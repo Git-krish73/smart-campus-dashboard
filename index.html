@@ -1,0 +1,850 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="dark">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="description" content="CampusVision AI - Smart Campus Scene Recognition & Edge AI Indoor Localization Dashboard powered by MobileNetV3-Large." />
+  <meta name="keywords" content="Edge AI, Scene Recognition, MobileNetV3, Smart Campus, Computer Vision, PyTorch" />
+  <title>CampusVision AI | Smart Campus Scene Recognition Dashboard</title>
+
+  <!-- Google Modern Typography -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;600;700&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+
+  <!-- Chart.js CDN -->
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
+
+  <!-- Core Stylesheet -->
+  <link rel="stylesheet" href="css/style.css" />
+</head>
+<body>
+  <div class="app-layout">
+    <!-- Left Navigation Sidebar -->
+    <aside class="sidebar" id="sidebar">
+      <div class="brand-header">
+        <div class="brand-icon-box">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M3 10.5 12 4l9 6.5M5.5 9.5V20h13V9.5M9 20v-6h6v6M8 10.5h.01M16 10.5h.01"/>
+          </svg>
+        </div>
+        <div class="brand-text">
+          <h1>Campus<span>Vision</span></h1>
+          <span class="brand-tag">SMART CAMPUS AI</span>
+        </div>
+      </div>
+
+      <nav class="nav-section">
+        <div class="nav-label">Navigation</div>
+        <ul class="nav-links">
+          <li>
+            <button class="nav-btn active" id="nav-overview" data-view="overview">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <rect x="3" y="3" width="7" height="9" rx="1"/><rect x="14" y="3" width="7" height="5" rx="1"/>
+                <rect x="14" y="12" width="7" height="9" rx="1"/><rect x="3" y="16" width="7" height="5" rx="1"/>
+              </svg>
+              Overview
+            </button>
+          </li>
+          <li>
+            <button class="nav-btn" id="nav-playground" data-view="playground">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <circle cx="12" cy="12" r="10"/><polygon points="10 8 16 12 10 16 10 8"/>
+              </svg>
+              AI Playground
+              <span class="nav-pill">LIVE</span>
+            </button>
+          </li>
+          <li>
+            <button class="nav-btn" id="nav-performance" data-view="performance">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <path d="M3 3v18h18"/><path d="m19 9-5 5-4-4-3 3"/>
+              </svg>
+              Model Analytics
+            </button>
+          </li>
+          <li>
+            <button class="nav-btn" id="nav-classes" data-view="classes">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <path d="M4 19.5v-15A2.5 2.5 0 0 1 6.5 2H20v20H6.5a2.5 2.5 0 0 1-2.5-2.5Z"/>
+                <path d="M6 6h10M6 10h10M6 14h6"/>
+              </svg>
+              Scene Classes
+            </button>
+          </li>
+          <li>
+            <button class="nav-btn" id="nav-architecture" data-view="architecture">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <polygon points="12 2 2 7 12 12 22 7 12 2"/>
+                <polyline points="2 17 12 22 22 17"/>
+                <polyline points="2 12 12 17 22 12"/>
+              </svg>
+              Architecture & Edge
+            </button>
+          </li>
+          <li>
+            <button class="nav-btn" id="nav-deploy" data-view="deploy">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <path d="M4.5 16.5c-1.5 1.26-2 5-2 5s3.74-.5 5-2c.71-.84.7-2.13-.09-2.91a2.18 2.18 0 0 0-2.91-.09z"/>
+                <path d="m12 15-3-3a22 22 0 0 1 2-3.95A12.88 12.88 0 0 1 22 2c0 2.72-.78 7.5-6 11a22.35 22.35 0 0 1-4 2z"/>
+              </svg>
+              Deploy & API
+            </button>
+          </li>
+        </ul>
+      </nav>
+
+      <div class="sidebar-footer">
+        <div class="edge-status-card">
+          <div class="edge-header">
+            <span>MODEL RUNTIME</span>
+            <span class="pulse-badge" id="edgeStatusBadge">
+              <span class="pulse-dot"></span> Active
+            </span>
+          </div>
+          <div class="edge-model-info">MobileNetV3-Large</div>
+          <div class="edge-metrics-mini">
+            <span>Latency: <strong>30.3 ms</strong></span>
+            <span>Speed: <strong>33 FPS</strong></span>
+          </div>
+        </div>
+      </div>
+    </aside>
+
+    <!-- Main Content Workspace -->
+    <div class="main-wrapper">
+      <!-- Top Navigation Bar -->
+      <header class="topbar">
+        <div class="breadcrumbs">
+          <span>Workspace</span>
+          <span class="divider">/</span>
+          <span class="current" id="currentCrumb">Overview</span>
+        </div>
+        <div class="topbar-actions">
+          <button class="theme-toggle-btn" id="themeToggle" aria-label="Toggle Theme" title="Toggle Light/Dark Theme">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <circle cx="12" cy="12" r="5"/>
+              <line x1="12" y1="1" x2="12" y2="3"/><line x1="12" y1="21" x2="12" y2="23"/>
+              <line x1="4.22" y1="4.22" x2="5.64" y2="5.64"/><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"/>
+              <line x1="1" y1="12" x2="3" y2="12"/><line x1="21" y1="12" x2="23" y2="12"/>
+              <line x1="4.22" y1="19.78" x2="5.64" y2="18.36"/><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"/>
+            </svg>
+          </button>
+          <button class="btn-deploy-pill" onclick="window.openImageModal('deploy_guide')">
+            <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2.5">
+              <path d="M5 12h14M12 5l7 7-7 7"/>
+            </svg>
+            Deployment Guide
+          </button>
+        </div>
+      </header>
+
+      <!-- View Sections Container -->
+      <main class="content-container">
+        
+        <!-- 1. OVERVIEW VIEW -->
+        <section class="dashboard-view active" id="view-overview">
+          <div class="view-header">
+            <div class="eyebrow">
+              <svg viewBox="0 0 24 24" width="14" height="14" fill="currentColor">
+                <path d="m12 3-1.912 5.813a2 2 0 0 1-1.275 1.275L3 12l5.813 1.912a2 2 0 0 1 1.275 1.275L12 21l1.912-5.813a2 2 0 0 1 1.275-1.275L21 12l-5.813-1.912a2 2 0 0 1-1.275-1.275L12 3Z"/>
+              </svg>
+              DEEP LEARNING &bull; EDGE AI
+            </div>
+            <h2>Smart Campus <span>Scene Recognition</span></h2>
+            <p class="view-subtitle">High-speed edge indoor localization and scene classification for university environments.</p>
+          </div>
+
+          <!-- KPI Executive Metrics Grid -->
+          <div class="kpi-grid">
+            <div class="kpi-card" style="--card-color: #38bdf8;">
+              <div class="kpi-top">
+                <span class="kpi-title">Top-1 Accuracy</span>
+                <div class="kpi-icon">
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <circle cx="12" cy="12" r="10"/><path d="m9 12 2 2 4-4"/>
+                  </svg>
+                </div>
+              </div>
+              <div class="kpi-value-row">
+                <span class="kpi-value">86.25%</span>
+                <span class="kpi-badge">+31.2%</span>
+              </div>
+              <span class="kpi-subtext">138 / 160 correct test scenes</span>
+            </div>
+
+            <div class="kpi-card" style="--card-color: #a855f7;">
+              <div class="kpi-top">
+                <span class="kpi-title">Top-3 Accuracy</span>
+                <div class="kpi-icon">
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/>
+                  </svg>
+                </div>
+              </div>
+              <div class="kpi-value-row">
+                <span class="kpi-value">98.12%</span>
+                <span class="kpi-badge">Top Tier</span>
+              </div>
+              <span class="kpi-subtext">157 / 160 top-3 hit rate</span>
+            </div>
+
+            <div class="kpi-card" style="--card-color: #10b981;">
+              <div class="kpi-top">
+                <span class="kpi-title">Macro-F1 Score</span>
+                <div class="kpi-icon">
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <path d="M18 20V10M12 20V4M6 20v-6"/>
+                  </svg>
+                </div>
+              </div>
+              <div class="kpi-value-row">
+                <span class="kpi-value">0.8663</span>
+                <span class="kpi-badge">Balanced</span>
+              </div>
+              <span class="kpi-subtext">Weighted F1: 0.87 across 6 classes</span>
+            </div>
+
+            <div class="kpi-card" style="--card-color: #f59e0b;">
+              <div class="kpi-top">
+                <span class="kpi-title">Inference Latency</span>
+                <div class="kpi-icon">
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/>
+                  </svg>
+                </div>
+              </div>
+              <div class="kpi-value-row">
+                <span class="kpi-value">30.30<small style="font-size:1rem; color:var(--text-muted); font-weight:600;">ms</small></span>
+                <span class="kpi-badge">33.0 FPS</span>
+              </div>
+              <span class="kpi-subtext">Real-time edge performance on CPU</span>
+            </div>
+
+            <div class="kpi-card" style="--card-color: #06b6d4;">
+              <div class="kpi-top">
+                <span class="kpi-title">Dataset Size</span>
+                <div class="kpi-icon">
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <rect x="3" y="3" width="18" height="18" rx="2" ry="2"/>
+                    <circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21 15 16 10 5 21"/>
+                  </svg>
+                </div>
+              </div>
+              <div class="kpi-value-row">
+                <span class="kpi-value">800</span>
+                <span class="kpi-badge">6 Classes</span>
+              </div>
+              <span class="kpi-subtext">640 Train &bull; 160 Test Images</span>
+            </div>
+          </div>
+
+          <!-- Quick Jump Callout Grid -->
+          <div class="charts-grid-2col">
+            <div class="panel-card">
+              <div class="panel-title-bar">
+                <h3>
+                  <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2">
+                    <circle cx="12" cy="12" r="10"/><polygon points="10 8 16 12 10 16 10 8"/>
+                  </svg>
+                  Interactive AI Playground
+                </h3>
+                <span class="pill-badge">Try It Now</span>
+              </div>
+              <p style="color:var(--text-muted); font-size:0.9rem; margin-bottom:16px;">
+                Experience the trained MobileNetV3-Large model live. Select any campus preset photograph or drag and drop your own photo to generate Top-3 predictions and campus automation triggers.
+              </p>
+              <button class="btn-primary-action" onclick="document.getElementById('nav-playground').click()">
+                Launch AI Playground &rarr;
+              </button>
+            </div>
+
+            <div class="panel-card">
+              <div class="panel-title-bar">
+                <h3>
+                  <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2">
+                    <path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"/>
+                  </svg>
+                  Capstone Artifacts Explorer
+                </h3>
+                <span class="pill-badge">Notebook Visuals</span>
+              </div>
+              <p style="color:var(--text-muted); font-size:0.9rem; margin-bottom:16px;">
+                Inspect authentic visual artifacts generated directly during notebook execution, including the 18-image training sample grid and scikit-learn test confusion matrix.
+              </p>
+              <div style="display:flex; gap:10px;">
+                <button class="btn-secondary-action" style="flex:1;" onclick="window.openImageModal('dataset_samples')">
+                  Dataset Sample Grid
+                </button>
+                <button class="btn-secondary-action" style="flex:1;" onclick="window.openImageModal('confusion_matrix')">
+                  Confusion Matrix Plot
+                </button>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <!-- 2. INTERACTIVE PLAYGROUND VIEW -->
+        <section class="dashboard-view" id="view-playground">
+          <div class="view-header">
+            <div class="eyebrow">
+              <span class="pulse-dot"></span>
+              REAL-TIME EDGE INFERENCE
+            </div>
+            <h2>Scene Recognition <span>Playground</span></h2>
+            <p class="view-subtitle">Upload any indoor photograph or click a campus space preset to run MobileNetV3 inference.</p>
+          </div>
+
+          <div class="playground-grid">
+            <!-- Left Input & Presets Column -->
+            <div class="panel-card">
+              <div class="presets-section">
+                <div class="presets-label">
+                  <span>1. Choose a Campus Space Preset</span>
+                  <small style="color:var(--primary);">Instant Demo</small>
+                </div>
+                <div class="presets-grid">
+                  <div class="preset-chip active" data-class="Corridor" data-src="assets/samples/corridor.jpg">
+                    <img src="assets/samples/corridor.jpg" alt="Corridor" />
+                    <span>Corridor</span>
+                  </div>
+                  <div class="preset-chip" data-class="Classroom" data-src="assets/samples/classroom.jpg">
+                    <img src="assets/samples/classroom.jpg" alt="Classroom" />
+                    <span>Classroom</span>
+                  </div>
+                  <div class="preset-chip" data-class="Common_Canteen" data-src="assets/samples/canteen.jpg">
+                    <img src="assets/samples/canteen.jpg" alt="Common Canteen" />
+                    <span>Canteen</span>
+                  </div>
+                  <div class="preset-chip" data-class="Laboratory" data-src="assets/samples/laboratory.jpg">
+                    <img src="assets/samples/laboratory.jpg" alt="Laboratory" />
+                    <span>Laboratory</span>
+                  </div>
+                  <div class="preset-chip" data-class="Library" data-src="assets/samples/library.jpg">
+                    <img src="assets/samples/library.jpg" alt="Library" />
+                    <span>Library</span>
+                  </div>
+                  <div class="preset-chip" data-class="Office" data-src="assets/samples/office.jpg">
+                    <img src="assets/samples/office.jpg" alt="Office" />
+                    <span>Office</span>
+                  </div>
+                </div>
+              </div>
+
+              <!-- Drag & Drop Upload Zone -->
+              <div class="dropzone-container">
+                <div class="presets-label">
+                  <span>2. Or Upload Custom Image</span>
+                  <small>JPG &bull; PNG &bull; WEBP (Max 15MB)</small>
+                </div>
+                <div class="dropzone" id="dropzone">
+                  <input type="file" id="imageInput" accept="image/png,image/jpeg,image/webp" style="display:none;" />
+                  
+                  <div class="dropzone-empty" id="dropzoneEmpty">
+                    <div class="dropzone-icon">
+                      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/>
+                        <polyline points="17 8 12 3 7 8"/>
+                        <line x1="12" y1="3" x2="12" y2="15"/>
+                      </svg>
+                    </div>
+                    <h4>Drop campus photo here</h4>
+                    <p>or click to browse files from your computer</p>
+                    <small>Image will be resized to 224x224 and normalized for MobileNetV3</small>
+                  </div>
+
+                  <div class="dropzone-preview" id="dropzonePreview">
+                    <img id="previewImage" src="assets/samples/corridor.jpg" alt="Selected Scene" />
+                    <div class="preview-overlay-bar">
+                      <span class="preview-file-name" id="previewFileName">corridor_sample.jpg</span>
+                      <button class="btn-change-img" id="btnChangeImg" type="button">Change Image</button>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              <!-- Action Controls -->
+              <div class="playground-actions">
+                <button class="btn-primary-action" id="analyzeBtn" type="button">
+                  <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2.5">
+                    <path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/>
+                  </svg>
+                  Analyze Scene
+                </button>
+                <button class="btn-secondary-action" id="clearBtn" type="button">
+                  Clear
+                </button>
+              </div>
+            </div>
+
+            <!-- Right Results & Telemetry Column -->
+            <div class="panel-card results-card">
+              <div class="panel-title-bar">
+                <h3>
+                  <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2">
+                    <polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/>
+                  </svg>
+                  Classification Output
+                </h3>
+                <span class="pill-badge" style="background:rgba(16, 185, 129, 0.15); color:var(--accent-emerald);">Model Ready</span>
+              </div>
+
+              <!-- Top-1 Prediction Hero Card -->
+              <div class="top-prediction-hero">
+                <div class="hero-tag">
+                  <svg viewBox="0 0 24 24" width="12" height="12" fill="currentColor">
+                    <circle cx="12" cy="12" r="10"/>
+                  </svg>
+                  TOP-1 PREDICTED SCENE
+                </div>
+                <div class="hero-class-name" id="heroClassName">Corridor</div>
+                <div class="hero-confidence-row">
+                  <span style="font-size:0.8rem; color:var(--text-dim); text-transform:uppercase; font-weight:700;">Softmax Confidence</span>
+                  <span class="hero-confidence-pct" id="heroConfidencePct">98.6%</span>
+                </div>
+                <p class="hero-desc" id="heroDesc">
+                  Linear transition corridor with classroom entrances and reflective flooring.
+                </p>
+              </div>
+
+              <!-- Top-3 Confidence Ranking Distribution -->
+              <div class="presets-label">
+                <span>Top-3 Probability Distribution</span>
+                <small>Logits Softmax</small>
+              </div>
+              <div class="rankings-list" id="rankingsList">
+                <!-- Dynamically populated by app.js -->
+              </div>
+
+              <!-- Real-time Inference Telemetry -->
+              <div class="telemetry-box">
+                <div class="telemetry-item">
+                  <small>Inference Time</small>
+                  <strong class="highlight" id="latencyDisplay">30.30 ms</strong>
+                </div>
+                <div class="telemetry-item">
+                  <small>Throughput</small>
+                  <strong id="fpsDisplay">33.0 FPS</strong>
+                </div>
+                <div class="telemetry-item">
+                  <small>Model Size</small>
+                  <strong id="memoryDisplay">21.1 MB</strong>
+                </div>
+              </div>
+
+              <!-- Automation Recommendation Notice -->
+              <div id="automationNotice"></div>
+            </div>
+          </div>
+        </section>
+
+        <!-- 3. MODEL ANALYTICS VIEW -->
+        <section class="dashboard-view" id="view-performance">
+          <div class="view-header">
+            <div class="eyebrow">EVALUATION &amp; TRAINING HISTORY</div>
+            <h2>Performance &amp; <span>Loss Curves</span></h2>
+            <p class="view-subtitle">Trained on Adam optimizer for 5 epochs with cross-entropy loss and ImageNet transfer learning.</p>
+          </div>
+
+          <div class="charts-grid-2col">
+            <!-- Training Curves -->
+            <div class="chart-card">
+              <div class="chart-header">
+                <h3>
+                  <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2">
+                    <polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/>
+                  </svg>
+                  Training Accuracy &amp; Loss (5 Epochs)
+                </h3>
+                <span class="pill-badge">96.88% Final</span>
+              </div>
+              <div class="chart-container-box">
+                <canvas id="trainingCurvesCanvas"></canvas>
+              </div>
+            </div>
+
+            <!-- Per-Class Metrics -->
+            <div class="chart-card">
+              <div class="chart-header">
+                <h3>
+                  <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2">
+                    <rect x="2" y="3" width="20" height="14" rx="2" ry="2"/><line x1="8" y1="21" x2="16" y2="21"/><line x1="12" y1="17" x2="12" y2="21"/>
+                  </svg>
+                  Class Precision, Recall &amp; F1-Score
+                </h3>
+                <span class="pill-badge">Macro F1: 0.8663</span>
+              </div>
+              <div class="chart-container-box">
+                <canvas id="classMetricsCanvas"></canvas>
+              </div>
+            </div>
+          </div>
+
+          <!-- Interactive Confusion Matrix Section -->
+          <div class="chart-card" style="margin-bottom:24px;">
+            <div class="chart-header">
+              <div>
+                <h3>
+                  <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2">
+                    <rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/>
+                    <rect x="14" y="14" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/>
+                  </svg>
+                  Interactive Test Confusion Matrix (160 Samples)
+                </h3>
+                <small style="color:var(--text-muted); font-size:0.75rem;">
+                  Horizontal rows represent true campus categories; vertical columns represent MobileNetV3 predictions.
+                </small>
+              </div>
+              <button class="btn-secondary-action" style="padding:6px 14px; font-size:0.8rem;" onclick="window.openImageModal('confusion_matrix')">
+                View Scikit-Learn Plot &rarr;
+              </button>
+            </div>
+            <div class="cm-table-wrapper" id="confusionMatrixTableContainer">
+              <!-- Rendered by charts.js -->
+            </div>
+          </div>
+        </section>
+
+        <!-- 4. SCENE CLASSES & DATASET VIEW -->
+        <section class="dashboard-view" id="view-classes">
+          <div class="view-header">
+            <div class="eyebrow">CAMPUS TAXONOMY</div>
+            <h2>Scene Categories &amp; <span>Dataset Split</span></h2>
+            <p class="view-subtitle">800 curated campus photographs categorized across 6 primary academic functional zones.</p>
+          </div>
+
+          <div class="charts-grid-2col" style="margin-bottom:28px;">
+            <div class="chart-card">
+              <div class="chart-header">
+                <h3>
+                  <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2">
+                    <circle cx="12" cy="12" r="10"/><path d="M12 2a10 10 0 0 1 10 10"/>
+                  </svg>
+                  Dataset Class Distribution
+                </h3>
+                <span class="pill-badge">800 Total Images</span>
+              </div>
+              <div class="chart-container-box">
+                <canvas id="datasetDistCanvas"></canvas>
+              </div>
+            </div>
+
+            <div class="panel-card" style="justify-content:center;">
+              <h3 style="font-size:1.15rem; font-weight:700; margin-bottom:8px;">Source Dataset Harmonization</h3>
+              <p style="color:var(--text-muted); font-size:0.85rem; margin-bottom:14px;">
+                The MIT Indoor-67 base dataset was systematically mapped into 6 distinct campus functional categories. For instance, dining spaces were unified:
+              </p>
+              <div class="code-box" style="margin-bottom:14px;">
+                <div class="code-header">
+                  <span class="code-lang">Python Dictionary Mapping</span>
+                </div>
+                <code>category_mapping = {<br>
+  "Classroom": ["classroom"],<br>
+  "Common_Canteen": ["buffet", "fastfood_restaurant", "restaurant"],<br>
+  "Corridor": ["corridor"],<br>
+  "Laboratory": ["laboratorywet"],<br>
+  "Library": ["library"],<br>
+  "Office": ["office"]<br>
+}</code>
+              </div>
+              <button class="btn-primary-action" onclick="window.openImageModal('dataset_samples')">
+                View 18-Image Batch Visualizer &rarr;
+              </button>
+            </div>
+          </div>
+
+          <!-- 6 Classes Gallery Cards -->
+          <div class="classes-gallery-grid">
+            <!-- Classroom -->
+            <div class="class-card">
+              <div class="class-img-box">
+                <img src="assets/samples/classroom.jpg" alt="Classroom" />
+                <span class="class-img-badge">01 &bull; Classroom</span>
+              </div>
+              <div class="class-body">
+                <h4>Classroom</h4>
+                <p style="font-size:0.8rem; color:var(--text-muted);">
+                  Learning spaces featuring lecture podiums, projection displays, and student tiered seating.
+                </p>
+                <div class="class-stat-pills">
+                  <span class="pill-stat">Train: <strong>80</strong></span>
+                  <span class="pill-stat">Test: <strong>20</strong></span>
+                  <span class="pill-stat">Total: <strong>100</strong></span>
+                </div>
+                <div class="class-metrics-row">
+                  <div><small>Precision</small><span>82.0%</span></div>
+                  <div><small>Recall</small><span>90.0%</span></div>
+                  <div><small>F1 Score</small><span>86.0%</span></div>
+                </div>
+              </div>
+            </div>
+
+            <!-- Common Canteen -->
+            <div class="class-card">
+              <div class="class-img-box">
+                <img src="assets/samples/canteen.jpg" alt="Common Canteen" />
+                <span class="class-img-badge">02 &bull; Common Canteen</span>
+              </div>
+              <div class="class-body">
+                <h4>Common Canteen</h4>
+                <p style="font-size:0.8rem; color:var(--text-muted);">
+                  Aggregated dining facilities, buffet lines, fast food counters, and communal dining benches.
+                </p>
+                <div class="class-stat-pills">
+                  <span class="pill-stat">Train: <strong>240</strong></span>
+                  <span class="pill-stat">Test: <strong>60</strong></span>
+                  <span class="pill-stat">Total: <strong>300</strong></span>
+                </div>
+                <div class="class-metrics-row">
+                  <div><small>Precision</small><span>100.0%</span></div>
+                  <div><small>Recall</small><span>76.7%</span></div>
+                  <div><small>F1 Score</small><span>86.7%</span></div>
+                </div>
+              </div>
+            </div>
+
+            <!-- Corridor -->
+            <div class="class-card">
+              <div class="class-img-box">
+                <img src="assets/samples/corridor.jpg" alt="Corridor" />
+                <span class="class-img-badge">03 &bull; Corridor</span>
+              </div>
+              <div class="class-body">
+                <h4>Corridor</h4>
+                <p style="font-size:0.8rem; color:var(--text-muted);">
+                  Indoor circulation thoroughfares with polished floors, overhead linear lighting, and signage.
+                </p>
+                <div class="class-stat-pills">
+                  <span class="pill-stat">Train: <strong>80</strong></span>
+                  <span class="pill-stat">Test: <strong>20</strong></span>
+                  <span class="pill-stat">Total: <strong>100</strong></span>
+                </div>
+                <div class="class-metrics-row">
+                  <div><small>Precision</small><span>100.0%</span></div>
+                  <div><small>Recall</small><span>95.0%</span></div>
+                  <div><small>F1 Score</small><span>97.4%</span></div>
+                </div>
+              </div>
+            </div>
+
+            <!-- Laboratory -->
+            <div class="class-card">
+              <div class="class-img-box">
+                <img src="assets/samples/laboratory.jpg" alt="Laboratory" />
+                <span class="class-img-badge">04 &bull; Laboratory</span>
+              </div>
+              <div class="class-body">
+                <h4>Laboratory</h4>
+                <p style="font-size:0.8rem; color:var(--text-muted);">
+                  Wet and practical engineering research labs containing chemical reagents, sinks, and microscopes.
+                </p>
+                <div class="class-stat-pills">
+                  <span class="pill-stat">Train: <strong>80</strong></span>
+                  <span class="pill-stat">Test: <strong>20</strong></span>
+                  <span class="pill-stat">Total: <strong>100</strong></span>
+                </div>
+                <div class="class-metrics-row">
+                  <div><small>Precision</small><span>82.0%</span></div>
+                  <div><small>Recall</small><span>90.0%</span></div>
+                  <div><small>F1 Score</small><span>85.7%</span></div>
+                </div>
+              </div>
+            </div>
+
+            <!-- Library -->
+            <div class="class-card">
+              <div class="class-img-box">
+                <img src="assets/samples/library.jpg" alt="Library" />
+                <span class="class-img-badge">05 &bull; Library</span>
+              </div>
+              <div class="class-body">
+                <h4>Library</h4>
+                <p style="font-size:0.8rem; color:var(--text-muted);">
+                  Quiet study environments characterized by ceiling-high bookshelves, individual study desks.
+                </p>
+                <div class="class-stat-pills">
+                  <span class="pill-stat">Train: <strong>80</strong></span>
+                  <span class="pill-stat">Test: <strong>20</strong></span>
+                  <span class="pill-stat">Total: <strong>100</strong></span>
+                </div>
+                <div class="class-metrics-row">
+                  <div><small>Precision</small><span>62.0%</span></div>
+                  <div><small>Recall</small><span>100.0%</span></div>
+                  <div><small>F1 Score</small><span>76.9%</span></div>
+                </div>
+              </div>
+            </div>
+
+            <!-- Office -->
+            <div class="class-card">
+              <div class="class-img-box">
+                <img src="assets/samples/office.jpg" alt="Office" />
+                <span class="class-img-badge">06 &bull; Office</span>
+              </div>
+              <div class="class-body">
+                <h4>Office</h4>
+                <p style="font-size:0.8rem; color:var(--text-muted);">
+                  Faculty and administrative spaces featuring desktop monitors, books, files, and personal desks.
+                </p>
+                <div class="class-stat-pills">
+                  <span class="pill-stat">Train: <strong>80</strong></span>
+                  <span class="pill-stat">Test: <strong>20</strong></span>
+                  <span class="pill-stat">Total: <strong>100</strong></span>
+                </div>
+                <div class="class-metrics-row">
+                  <div><small>Precision</small><span>89.0%</span></div>
+                  <div><small>Recall</small><span>85.0%</span></div>
+                  <div><small>F1 Score</small><span>87.2%</span></div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <!-- 5. ARCHITECTURE & EDGE AI VIEW -->
+        <section class="dashboard-view" id="view-architecture">
+          <div class="view-header">
+            <div class="eyebrow">EDGE COMPUTING &amp; TRANSFER LEARNING</div>
+            <h2>MobileNetV3-Large <span>Architecture</span></h2>
+            <p class="view-subtitle">Optimized for sub-35ms inference latency on low-power campus edge devices and smart CCTV.</p>
+          </div>
+
+          <div class="architecture-diagram-card">
+            <h3 style="font-size:1.15rem; font-weight:700; margin-bottom:12px;">End-to-End Model Pipeline</h3>
+            <div class="arch-flow">
+              <div class="arch-node">
+                <div class="arch-node-tag" style="color:var(--text-dim);">Input Stage</div>
+                <h5>RGB Image</h5>
+                <p>224 x 224 x 3<br>Normalized (ImageNet)</p>
+              </div>
+
+              <div class="arch-arrow">&rarr;</div>
+
+              <div class="arch-node frozen">
+                <div class="arch-node-tag">Frozen Backbone</div>
+                <h5>MobileNetV3-Large</h5>
+                <p>15 Inverted Residuals<br>Hard-Swish &bull; SE Blocks</p>
+              </div>
+
+              <div class="arch-arrow">&rarr;</div>
+
+              <div class="arch-node">
+                <div class="arch-node-tag" style="color:var(--text-dim);">Pooling</div>
+                <h5>AdaptiveAvgPool2d</h5>
+                <p>1 x 1 x 960<br>Global Context Vector</p>
+              </div>
+
+              <div class="arch-arrow">&rarr;</div>
+
+              <div class="arch-node trained">
+                <div class="arch-node-tag">Custom Head</div>
+                <h5>Linear Classifier</h5>
+                <p>in_features: 1280<br>out_classes: 6 (Trained)</p>
+              </div>
+
+              <div class="arch-arrow">&rarr;</div>
+
+              <div class="arch-node" style="border-color:var(--accent-emerald);">
+                <div class="arch-node-tag" style="color:var(--accent-emerald);">Output</div>
+                <h5>Softmax Probabilities</h5>
+                <p>Top-1 Scene Class<br>Top-3 Ranking</p>
+              </div>
+            </div>
+
+            <div class="charts-grid-2col" style="margin-top:20px;">
+              <div style="background:var(--bg-elevated); padding:16px; border-radius:12px;">
+                <h4 style="font-size:0.95rem; font-weight:700; margin-bottom:6px; color:var(--primary);">Hard-Swish Activation Function</h4>
+                <p style="font-size:0.8rem; color:var(--text-muted); line-height:1.5;">
+                  Replaces sigmoid-based Swish with a piece-wise linear approximation: <code>h-swish(x) = x * ReLU6(x + 3) / 6</code>. Eliminates non-linear transcendental operations, drastically accelerating CPU inference.
+                </p>
+              </div>
+              <div style="background:var(--bg-elevated); padding:16px; border-radius:12px;">
+                <h4 style="font-size:0.95rem; font-weight:700; margin-bottom:6px; color:var(--accent-purple);">Squeeze-and-Excitation (SE) Attention</h4>
+                <p style="font-size:0.8rem; color:var(--text-muted); line-height:1.5;">
+                  Dynamically recalibrates channel-wise feature responses by explicitly modeling interdependencies between channels. Boosts fine-grained scene recognition between visually similar rooms.
+                </p>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <!-- 6. DEPLOYMENT & API VIEW -->
+        <section class="dashboard-view" id="view-deploy">
+          <div class="view-header">
+            <div class="eyebrow">PRODUCTION READINESS</div>
+            <h2>Deployment &amp; <span>API Integration</span></h2>
+            <p class="view-subtitle">Run the static dashboard anywhere or launch the Python FastAPI service with PyTorch.</p>
+          </div>
+
+          <div class="charts-grid-2col">
+            <!-- Option 1: Static Hosting -->
+            <div class="panel-card">
+              <div class="panel-title-bar">
+                <h3>Option 1: 1-Click Static Web App</h3>
+                <span class="pill-badge">Zero Config</span>
+              </div>
+              <p style="font-size:0.85rem; color:var(--text-muted); margin-bottom:14px;">
+                Deploy this dashboard as a standalone Single Page Application to Vercel, Netlify, or GitHub Pages. Runs entirely in the browser with embedded dataset assets and instant sample inference.
+              </p>
+              <div class="code-box" style="margin-bottom:14px;">
+                <div class="code-header">
+                  <span class="code-lang">CLI Deployment</span>
+                </div>
+                <code># Deploy with Vercel<br>npx vercel --prod<br><br># Or run locally<br>npx serve .</code>
+              </div>
+              <button class="btn-primary-action" onclick="window.open('http://localhost:3000', '_blank')">
+                Open Local Preview &rarr;
+              </button>
+            </div>
+
+            <!-- Option 2: FastAPI Backend -->
+            <div class="panel-card">
+              <div class="panel-title-bar">
+                <h3>Option 2: FastAPI + PyTorch Server</h3>
+                <span class="pill-badge" style="background:rgba(168, 85, 247, 0.15); color:var(--accent-purple);">Backend API</span>
+              </div>
+              <p style="font-size:0.85rem; color:var(--text-muted); margin-bottom:14px;">
+                Run our bundled <code>server.py</code> to load the trained <code>mobilenetv3_six_class.pth</code> weights and serve live predictions via REST API:
+              </p>
+              <div class="code-box" style="margin-bottom:14px;">
+                <div class="code-header">
+                  <span class="code-lang">Terminal Command</span>
+                </div>
+                <code>pip install fastapi uvicorn torchvision<br>python server.py</code>
+              </div>
+              <div class="code-box">
+                <div class="code-header">
+                  <span class="code-lang">cURL Test</span>
+                </div>
+                <code>curl -X POST "http://localhost:8000/predict" \<br>
+  -F "file=@assets/samples/corridor.jpg"</code>
+              </div>
+            </div>
+          </div>
+        </section>
+
+      </main>
+    </div>
+  </div>
+
+  <!-- Asset Inspection Modal -->
+  <div class="modal-overlay" id="modalOverlay">
+    <div class="modal-dialog">
+      <div class="modal-header">
+        <h3 id="modalTitle" style="font-size:1.15rem; font-weight:700;">Notebook Inspection</h3>
+        <button class="btn-close-modal" id="closeModalBtn">&times;</button>
+      </div>
+      <div class="modal-body" id="modalContent">
+        <!-- Injected via JavaScript -->
+      </div>
+    </div>
+  </div>
+
+  <!-- Toast Notification -->
+  <div class="toast-notice" id="toastNotice"></div>
+
+  <!-- Scripts -->
+  <script src="js/charts.js"></script>
+  <script src="js/app.js"></script>
+</body>
+</html>

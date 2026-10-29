@@ -1,0 +1,19 @@
+{
+  "name": "smart-campus-dashboard",
+  "version": "1.0.0",
+  "description": "CampusVision AI - Smart Campus Indoor Scene Recognition Dashboard",
+  "main": "index.html",
+  "scripts": {
+    "start": "npx -y serve . -l 3000",
+    "dev": "npx -y serve . -l 3000"
+  },
+  "keywords": [
+    "edge-ai",
+    "scene-recognition",
+    "mobilenetv3",
+    "computer-vision",
+    "campus-navigation"
+  ],
+  "author": "Krish Yadav",
+  "license": "MIT"
+}
